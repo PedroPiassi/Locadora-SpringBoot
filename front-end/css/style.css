@@ -1,0 +1,25 @@
+body {
+    background-color: black;
+}
+
+nav {
+    background-color: #212529;
+}
+
+nav > div {
+    display: flex;
+    justify-content: space-between;
+}
+
+h1,  h2 {
+    color:#cebc77;
+    text-align: center;
+}
+
+label, a, th, td {
+    color: #fff;
+}
+
+a {
+    text-decoration: none;
+}

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="../css/style.css">
+    <title>Garagem</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg ">
+        <div class="container-fluid">
+            <h1>GARAGEM PIASSI</h1>
+            <button class="btn btn-success" type="submit"><a href="./Cadastrar.html">CADASTRAR CARRO</a></button>
+        </div>
+    </nav>
+
+    <div class="container col-6 mt-5">
+        <h2 class="title is-3 mb-4 mt-6"><b>Carros Cadastrados</b></h2>
+
+        <table class="table text-center">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Placa</th>
+                    <th>Marca</th>
+                    <th>Ano</th>
+                    <th>Km rodados</th>
+                    <th>Preço</th>
+                    <th>Opções</th>
+                </tr>
+            </thead>
+
+            <tbody id="exibir"></tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-dark">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">UPDATE</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body bg-dark">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" id="nome" name="nome" class="form-control"
+                                placeholder="Digite o nome do carro">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Marca</label>
+                            <input type="text" id="marca" name="marca" class="form-control"
+                                placeholder="Digite a marca do carro">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ano</label>
+                            <input type="number" id="ano" name="ano" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">km rodados</label>
+                            <input type="number" id="kmRodados" name="kmRodados" class="form-control"
+                                placeholder="Digite o nome do carro">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Placa</label>
+                            <input type="text" id="placa" name="placa" class="form-control"
+                                placeholder="Digite a placa do carro" disabled>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Valor</label>
+                            <input type="number" id="valor" name="valor" class="form-control"
+                                placeholder="R$: 0.000,00">
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer bg-dark">
+                    <button type="button" class="btn btn-success" id="alterar" data-bs-dismiss="modal">ALTERAR</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">CANCELAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            carregarCarros();
+        }
+
+        const carregarCarros = function () {
+            $.ajax({
+                url: "http://localhost:8080/carro",
+                type: "GET",
+            }).done(function (resposta) {
+                $('#exibir').html(mostrarCarros(resposta));
+            })
+        }
+
+        const mostrarCarros = (carros) => {
+            return carros.map((carro) => {
+                return (`
+                    <tr>
+                        <td>${carro.nome}</td>
+                        <td>${carro.placa}</td>
+                        <td>${carro.marca}</td>
+                        <td>${carro.ano}</td>
+                        <td>${carro.kmRodados}</td>
+                        <td>${carro.valor}</td>
+                        <td id="${carro.id}">
+                            <button class="btn btn-success" id="btnAlterar" data-bs-toggle="modal" data-bs-target="#exampleModal">ALTERAR</button>
+                            <button class="btn btn-danger ms-3" id="btnExcluir">EXCLUIR</button>
+                        </td>
+                    </tr>
+                `)
+            }).join('');
+        }
+
+        $(document).on("click", "#btnAlterar", function (e) {
+            e.preventDefault();
+
+            let id = e.target.offsetParent.id;
+
+            $.ajax({
+                url: "http://localhost:8080/carro/" + id,
+                type: "GET",
+                success: function (msg) {
+                    $("#nome").val(msg.nome);
+                    $("#marca").val(msg.marca);
+                    $("#ano").val(msg.ano);
+                    $("#kmRodados").val(msg.kmRodados);
+                    $("#placa").val(msg.placa);
+                    $("#valor").val(msg.valor);
+                },
+                error: function (request, status, error) {
+                    alert("Erro ao carregar dados do carro!");
+                },
+            });
+
+
+            $("#alterar").click(function (e) {
+                e.preventDefault();
+
+                var nome = $('#nome').val();
+                var marca = $('#marca').val();
+                var ano = $('#ano').val();
+                var kmRodados = $('#kmRodados').val();
+                var placa = $('#placa').val();
+                var valor = $('#valor').val();
+
+                $.ajax({
+                    url: "http://localhost:8080/carro/" + id,
+                    type: "PUT",
+                    contentType: "application/json;charset=UTF-8",
+                    data: JSON.stringify({nome : nome, marca : marca, ano : ano, kmRodados : kmRodados, 
+                    placa : placa, valor : valor}),
+                    success: function (msg) {
+                        carregarCarros();
+                    },
+                    error: function (request, status, error) {
+                        alert("Carro não alterado!");
+                    },
+                });
+            })
+        })
+
+        $(document).on("click", "#btnExcluir", function (e) {
+            e.preventDefault();
+
+            let id = e.target.offsetParent.id;
+
+            $.ajax({
+                url: "http://localhost:8080/carro/" + id,
+                type: "DELETE",
+                success: function (msg) {
+                    carregarCarros();
+                },
+                error: function (request, status, error) {
+                    alert("Carro não deletado!");
+                },
+            });
+        })
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
